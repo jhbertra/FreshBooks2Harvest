@@ -3,23 +3,49 @@ open System
 open System.IO
 
 
+type FreshBooksAuthorizationConfig = {
+    clientId : string
+    clientSecret : string
+    authorizationCode : string
+    redirectUrl : string
+}
+
+
+module FreshBooksAuthorizationConfig =
+    
+    let create clientId clientSecret authorizationCode redirectUrl = {
+        clientId = clientId
+        clientSecret = clientSecret
+        authorizationCode = authorizationCode
+        redirectUrl = redirectUrl
+    }
+    
+    
+
+
+type AuthorizationConfig = {
+    freshBooks : FreshBooksAuthorizationConfig
+}
+
+
+module AuthorizationConfig =
+    
+    let create freshBooks = {
+        freshBooks = freshBooks
+    }
+
+
 type Config = {
     dataDir : DirectoryInfo
-    freshbooksClientId : string
-    freshbooksClientSecret : string
-    freshbooksCode : string
-    freshbooksRedirectUrl : string
+    auth : AuthorizationConfig
 }
 
 
 module Config =
     
-    let create dataDir freshbooksClientId freshbooksClientSecret freshbooksCode freshbooksRedirectUrl = {
+    let create dataDir auth = {
         dataDir = dataDir
-        freshbooksClientId = freshbooksClientId
-        freshbooksClientSecret = freshbooksClientSecret
-        freshbooksCode = freshbooksCode
-        freshbooksRedirectUrl = freshbooksRedirectUrl
+        auth = auth
     }
 
 
@@ -152,3 +178,31 @@ module TimeEntry =
         serviceId = serviceId
         startedAt = startedAt 
     }
+    
+type ExternalSource =
+    | ConfigFile
+    | DataDir
+
+type JsonEntity =
+    | Config
+    
+type FreshBooksAuthField =
+    | ClientId
+    | ClientSecret
+    | AuthorizationCode
+    | RedirectUrl
+    
+type AuthField =
+    | FreshBooks
+    | FreshBooksChild of FreshBooksAuthField
+    
+type ConfigField =
+    | DataDir
+    | Auth
+    | AuthChild of AuthField 
+
+type Error =
+    | ConfigInvalid of (ConfigField * Error)
+    | IoError of (ExternalSource * Error)
+    | JsonInvalid of (JsonEntity * Error)
+    | Pure of string

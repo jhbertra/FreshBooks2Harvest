@@ -1,7 +1,11 @@
 module FreshBooks2Harvest.Common
 
+open FreshBooks2Harvest.Domain
 open System
 open System.IO
+
+let first f (a, b) = (f a, b)
+let second f (a, b) = (a, f b)
 
 module Result =
     
@@ -13,21 +17,26 @@ module Result =
     
     let inline (<*>) mfab ma = Result.bind (fun fab -> fab <^> ma) mfab
     
-    let notNull id = function
-    | null -> Error (sprintf "%s is required" id)
-    | a -> Ok a
+    let notNull tag a =
+        match box a with
+        | null -> Error (tag, Pure "Required value")
+        | _ -> Ok a
     
-    let createDirectory s =
+    let createDirectory source s =
         try
             Ok (Directory.CreateDirectory s)
         with
-        | e -> Error e.Message
+        | e -> IoError (source, Pure e.Message) |> Error
         
-    let readFile s =
+    let readFile source s =
         try
             Ok (File.ReadAllText s)
         with
-        | e -> Error e.Message
+        | e -> IoError (source, Pure e.Message) |> Error
+        
+    let tag t = Result.mapError (fun e -> (t, e))
+        
+    let wrapTag f = first f |> Result.mapError
         
     let ofOption error = function Some s -> Ok s | None -> Error error
 
