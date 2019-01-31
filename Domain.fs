@@ -1,22 +1,42 @@
 module FreshBooks2Harvest.Domain
 open System
+open System.IO
+
+
+type Config = {
+    dataDir : DirectoryInfo
+    freshbooksClientId : string
+    freshbooksClientSecret : string
+    freshbooksCode : string
+    freshbooksRedirectUrl : string
+}
+
+
+module Config =
+    
+    let create dataDir freshbooksClientId freshbooksClientSecret freshbooksCode freshbooksRedirectUrl = {
+        dataDir = dataDir
+        freshbooksClientId = freshbooksClientId
+        freshbooksClientSecret = freshbooksClientSecret
+        freshbooksCode = freshbooksCode
+        freshbooksRedirectUrl = freshbooksRedirectUrl
+    }
+
 
 type TokenRequest = {
     clientId : string
     clientSecret : string
     code : string
-    grantType : string
     redirectUrl : string
 }
 
 
 module TokenRequest =
 
-    let create clientId clientSecret code grantType redirectUrl = { 
+    let create clientId clientSecret code redirectUrl = { 
         clientId = clientId
         clientSecret = clientSecret
         code = code
-        grantType = grantType
         redirectUrl = redirectUrl
     }
 
